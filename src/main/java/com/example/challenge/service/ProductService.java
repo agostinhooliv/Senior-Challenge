@@ -6,10 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import javax.transaction.Transactional;
 import java.util.Optional;
 import java.util.UUID;
 
 @org.springframework.stereotype.Service
+@Transactional
 public class ProductService {
 
     @Autowired

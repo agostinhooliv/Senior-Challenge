@@ -1,7 +1,6 @@
 package com.example.challenge;
 
 import com.example.challenge.controller.ProductController;
-import com.example.challenge.repository.ProductRepository;
 import com.example.challenge.service.ProductService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +12,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-
-import java.util.UUID;
 
 @WebMvcTest(ProductController.class)
 public class ProductTest {
@@ -50,6 +47,7 @@ public class ProductTest {
 
     @Test
     public void delete() throws Exception {
+
         RequestBuilder request = MockMvcRequestBuilders
                 .delete("/api/products/delete/95687866-873f-4d0e-9e24-269bc7336764");
 
@@ -58,10 +56,10 @@ public class ProductTest {
     }
 
     @Test
-    public void getAll() throws Exception {
+    public void findAll() throws Exception {
 
         RequestBuilder request = MockMvcRequestBuilders
-                .get("/api/products/getAll")
+                .get("/api/products/findAll")
                 .accept(MediaType.APPLICATION_JSON);
 
         MvcResult result = mockMvc.perform(request)

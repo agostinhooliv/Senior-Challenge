@@ -32,6 +32,10 @@ public class Order implements Serializable {
     public Order() {
     }
 
+    public Order(UUID idOder) {
+        this.idOder = idOder;
+    }
+
     public Order(String description, Date date, float discount, double balance, char status) {
         this.description = description;
         this.date = date;

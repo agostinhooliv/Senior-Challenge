@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.*;
 
 @RestController
@@ -19,8 +20,8 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
-    @GetMapping("/getAllPageable")
-    public ResponseEntity<Map<String, Object>> getAllProducts(@RequestParam(defaultValue = "0") int page,
+    @GetMapping("/findAllPageable")
+    public ResponseEntity<Map<String, Object>> findAllPageable(@RequestParam(defaultValue = "0") int page,
                                                               @RequestParam(defaultValue = "5") int size) {
         List<Product> listProducts = new ArrayList<>();
 
@@ -37,8 +38,8 @@ public class ProductController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/getAll")
-    public ResponseEntity<Iterable<Product>> getAll2() {
+    @GetMapping("/findAll")
+    public ResponseEntity<Iterable<Product>> findAll() {
         return new ResponseEntity<>(productService.findAll(), HttpStatus.OK);
     }
 
@@ -55,19 +56,19 @@ public class ProductController {
     }
 
     @PostMapping("/save")
-    public ResponseEntity<Product> save(@RequestBody Product product) {
+    public ResponseEntity<Product> save(@Valid @RequestBody Product product) {
         return new ResponseEntity<>(productService.save(product), HttpStatus.CREATED);
     }
 
     @PutMapping("/update/{uuid}")
-    public ResponseEntity<Product> update(@PathVariable UUID uuid, @RequestBody Product product) {
+    public ResponseEntity<Product> update(@Valid @PathVariable UUID uuid, @RequestBody Product product) {
 
         Optional<Product> product1 = productService.findById(uuid);
 
         if (!product1.isPresent())
             new ResponseEntity(HttpStatus.NOT_FOUND);
 
-        return new ResponseEntity<>(productService.save(product), HttpStatus.OK);
+        return new ResponseEntity<>(productService.save(product), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/delete/{uuid}")
@@ -82,7 +83,7 @@ public class ProductController {
 
 
             productService.deleteById(uuid);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(HttpStatus.CREATED);
 
         } catch (Exception e) {
             return new ResponseEntity<>("Can't exclude this product, it's been linked to an order!", HttpStatus.FORBIDDEN);

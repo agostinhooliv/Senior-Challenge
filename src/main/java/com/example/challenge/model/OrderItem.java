@@ -14,7 +14,7 @@ public class OrderItem implements Serializable {
     @Column(name = "idOrderItem")
     private UUID id;
     @OneToOne
-    @JoinColumn(name = "idOder")
+    @JoinColumn(name = "idOrder")
     private Order order;
     @ManyToMany
     private List<Product> products = new ArrayList<>();
