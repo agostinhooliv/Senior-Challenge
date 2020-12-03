@@ -6,19 +6,13 @@ import com.example.challenge.model.Product;
 import com.example.challenge.repository.OrderItemRepository;
 import com.example.challenge.repository.OrderRepository;
 import com.example.challenge.repository.ProductRepository;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.transaction.Transactional;
-import java.util.*;
+import java.util.Optional;
+import java.util.UUID;
 
 @org.springframework.stereotype.Service
 @Transactional
@@ -37,6 +31,10 @@ public class OrderService {
 
     public void saveOrderItem(OrderItem orderItem) {
         orderItemRepository.save(orderItem);
+    }
+
+    public Page<Order> findAll(Pageable pageable){
+        return orderRepository.findAll(pageable);
     }
 
     public Iterable<Order> findAll() {

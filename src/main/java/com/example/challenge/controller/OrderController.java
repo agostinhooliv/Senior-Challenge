@@ -3,7 +3,6 @@ package com.example.challenge.controller;
 import com.example.challenge.model.Order;
 import com.example.challenge.model.OrderItem;
 import com.example.challenge.model.Product;
-import com.example.challenge.repository.OrderRepository;
 import com.example.challenge.service.OrderService;
 import com.example.challenge.service.ProductService;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -37,6 +36,7 @@ public class OrderController {
         List<Product> products = new ArrayList<>();
         double balance = 0.0d;
         float discount = (Float.parseFloat(objectNode.get("discount").asText()) / 100);
+        char status = objectNode.get("status").toString().charAt(1);
         ObjectMapper mapper = new ObjectMapper();
         Order order = new Order();
 
@@ -46,7 +46,7 @@ public class OrderController {
             if (!order1.isPresent())
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-            order.setIdOder(uuid);
+            order = order1.get();
         }
 
         try {
@@ -59,10 +59,15 @@ public class OrderController {
                         //Isn't allowed to add inactives products
                         if (product.getStatus() == 'A') {
                             products.add(product);
-                            balance += (productData.get().getValue() * jsonNode.get(1).asInt());
-                            //Applying percentual of discount, just if is a product
+                            balance += (productData.get().getPrice() * jsonNode.get(1).asInt());
+                            //Applying percentual of discount, just if is a product and order status is not 'C'
                             if (productData.get().getType() == 'P') {
-                                balance -= (balance * discount);
+                                if (order.getStatus() != 'C') {
+                                    balance -= (balance * discount);
+                                    order.setDiscount(discount);
+                                } else{
+                                    order.setDiscount(order.getDiscount());
+                                }
                             }
                         }
                     }
@@ -74,21 +79,38 @@ public class OrderController {
 
         order.setDescription(objectNode.get("description").asText());
         order.setDate(new Date());
-        order.setDiscount(discount);
         order.setBalance(balance);
-        order.setStatus('O');
+
+        if (status != 0) {
+            order.setStatus(status);
+        } else {
+            order.setStatus('O');
+        }
 
         OrderItem orderItem = new OrderItem(order, products);
 
         orderService.saveOrder(order);
         orderService.saveOrderItem(orderItem);
 
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping("/findAll")
-    public ResponseEntity<Iterable<?>> findAll() {
-        return new ResponseEntity<>(orderService.findAll(), HttpStatus.OK);
+    public ResponseEntity<Map<String, Object>> findAll(@RequestParam(defaultValue = "0", required = false) int page,
+                                                       @RequestParam(defaultValue = "5", required = false) int size) {
+
+        List<Order> orderList = new ArrayList<>();
+        Pageable paging = PageRequest.of(page, size);
+        Page<Order> orderPage = orderService.findAll(paging);
+        orderList = orderPage.getContent();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("Orders", orderList);
+        response.put("currentPage", orderPage.getNumber());
+        response.put("totalItems", orderPage.getTotalElements());
+        response.put("totalPages", orderPage.getTotalPages());
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @DeleteMapping("/delete")

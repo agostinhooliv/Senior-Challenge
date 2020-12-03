@@ -16,12 +16,12 @@ public class Product implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "idProduct")
     private UUID idProduct;
-    @Column(name = "name")
+    @Column(unique = true)
     @NotBlank(message = "Field is mandatory!")
     private String name;
     @NotNull(message = "Field is mandatory!")
-    @Column(name = "value")
-    private double value;
+    @Column(name = "price")
+    private double price;
     @Column(name = "type")
     @ProductType
     private char type;
@@ -36,9 +36,9 @@ public class Product implements Serializable {
         this.name = name;
     }
 
-    public Product(String name, double value, char type, char status) {
+    public Product(String name, double price, char type, char status) {
         this.name = name;
-        this.value = value;
+        this.price = price;
         this.type = type;
         this.status = status;
     }
@@ -67,12 +67,12 @@ public class Product implements Serializable {
         this.type = type;
     }
 
-    public double getValue() {
-        return value;
+    public double getPrice() {
+        return price;
     }
 
-    public void setValue(double value) {
-        this.value = value;
+    public void setPrice(double price) {
+        this.price = price;
     }
 
     public char getStatus() {

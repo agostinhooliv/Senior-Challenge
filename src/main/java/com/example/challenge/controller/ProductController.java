@@ -20,9 +20,9 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
-    @GetMapping("/findAllPageable")
-    public ResponseEntity<Map<String, Object>> findAllPageable(@RequestParam(defaultValue = "0") int page,
-                                                              @RequestParam(defaultValue = "5") int size) {
+    @GetMapping("/findAll")
+    public ResponseEntity<Map<String, Object>> findAll(@RequestParam(defaultValue = "0", required = false) int page,
+                                                               @RequestParam(defaultValue = "5", required = false) int size) {
         List<Product> listProducts = new ArrayList<>();
 
         Pageable paging = PageRequest.of(page, size);
@@ -38,13 +38,8 @@ public class ProductController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/findAll")
-    public ResponseEntity<Iterable<Product>> findAll() {
-        return new ResponseEntity<>(productService.findAll(), HttpStatus.OK);
-    }
-
-    @GetMapping("/byName/{name}")
-    public ResponseEntity<Product> getProductsByName(@PathVariable String name) {
+    @GetMapping("/byName")
+    public ResponseEntity<Product> getProductsByName(@RequestParam(name = "name") String name) {
 
         Optional<Product> productData = productService.findByName(name);
 
@@ -55,35 +50,39 @@ public class ProductController {
         }
     }
 
-    @PostMapping("/save")
-    public ResponseEntity<Product> save(@Valid @RequestBody Product product) {
-        return new ResponseEntity<>(productService.save(product), HttpStatus.CREATED);
+    @PostMapping("/createOrUpdate")
+    public ResponseEntity<Product> createOrUpdate(@RequestParam(name = "uuid", required = false) UUID uuid, @Valid @RequestBody Product product) {
+
+        if (uuid != null && !uuid.equals("")) {
+            Optional<Product> product1 = productService.findById(uuid);
+
+            if (!product1.isPresent())
+                new ResponseEntity(HttpStatus.NOT_FOUND);
+
+            product.setIdProduct(uuid);
+        }
+
+        try {
+            productService.save(product);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(HttpStatus.IM_USED);
+        }
     }
 
-    @PutMapping("/update/{uuid}")
-    public ResponseEntity<Product> update(@Valid @PathVariable UUID uuid, @RequestBody Product product) {
-
-        Optional<Product> product1 = productService.findById(uuid);
-
-        if (!product1.isPresent())
-            new ResponseEntity(HttpStatus.NOT_FOUND);
-
-        return new ResponseEntity<>(productService.save(product), HttpStatus.CREATED);
-    }
-
-    @DeleteMapping("/delete/{uuid}")
-    public ResponseEntity<String> deleteProduct(@PathVariable UUID uuid) {
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteProduct(@RequestParam(name = "uuid") UUID uuid) {
 
         try {
 
             Optional<Product> product = productService.findById(uuid);
 
             if (!product.isPresent())
-                new ResponseEntity(HttpStatus.NOT_FOUND);
+                return new ResponseEntity(HttpStatus.NOT_FOUND);
 
 
             productService.deleteById(uuid);
-            return new ResponseEntity<>(HttpStatus.CREATED);
+            return new ResponseEntity<>(HttpStatus.OK);
 
         } catch (Exception e) {
             return new ResponseEntity<>("Can't exclude this product, it's been linked to an order!", HttpStatus.FORBIDDEN);
